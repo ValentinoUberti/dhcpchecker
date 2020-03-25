@@ -28,20 +28,12 @@ type Client struct {
 	macs       []string
 }
 
-func NewClient(smac, peermac, ifname, hostname string) (*Client, error) {
-	hw, err := net.ParseMAC(smac)
-	if err != nil {
-		return nil, err
-	}
-	peerhw, err := net.ParseMAC(peermac)
-	if err != nil {
-		return nil, err
-	}
+func NewClient(macsToCheck []string, ifname, hostname string) (*Client, error) {
 	srcIP := net.ParseIP("0.0.0.0")
 
 	//eth layer
 	eth := &layers.Ethernet{}
-	eth.SrcMAC = hw
+	//eth.SrcMAC = hw
 	eth.DstMAC, _ = net.ParseMAC("ff:ff:ff:ff:ff:ff")
 	eth.EthernetType = layers.EthernetTypeIPv4
 
@@ -68,7 +60,7 @@ func NewClient(smac, peermac, ifname, hostname string) (*Client, error) {
 	dhcp4.HardwareType = layers.LinkTypeEthernet
 	dhcp4.Xid = uint32(rand.Int31())
 	dhcp4.ClientIP = net.ParseIP("0.0.0.0")
-	dhcp4.ClientHWAddr = hw
+	//dhcp4.ClientHWAddr = hw
 
 	options := []byte{
 		1,  // (Subnet mask)
@@ -162,11 +154,8 @@ func NewClient(smac, peermac, ifname, hostname string) (*Client, error) {
 		return nil, err
 	}
 
-	macs := []string{"11:22:33:44:55:66", "84:7b:eb:27:0c:a4", "84:7b:eb:27:0c:10", "84:7b:eb:27:0c:a9"}
-
 	c := &Client{
-		HW:        hw,
-		PeerHw:    peerhw,
+
 		IP:        srcIP,
 		IFName:    ifname,
 		ethLayer:  eth,
@@ -178,7 +167,7 @@ func NewClient(smac, peermac, ifname, hostname string) (*Client, error) {
 			ComputeChecksums: true,
 		},
 		pcapHandle: writeHandle,
-		macs:       macs,
+		macs:       macsToCheck,
 	}
 
 	return c, nil
@@ -218,7 +207,7 @@ func (c *Client) Start() error {
 func (c *Client) readPacket(handle *pcap.Handle, endChan chan<- int, requestsNumber int) {
 
 	src := gopacket.NewPacketSource(handle, handle.LinkType())
-	receivedDhcpPacker := 0
+	receivedDhcpPacket := 0
 
 	var packet gopacket.Packet
 	t := time.After(time.Second * 30)
@@ -227,13 +216,8 @@ func (c *Client) readPacket(handle *pcap.Handle, endChan chan<- int, requestsNum
 		case packet = <-src.Packets():
 			{
 				if dhcp4layer := packet.Layer(layers.LayerTypeDHCPv4); dhcp4layer != nil {
-					log.Println("Analyizing Jedy Dhcp4 packet")
+					log.Println("Analyizing dhcpv4 packet")
 					dhcp4 := dhcp4layer.(*layers.DHCPv4)
-					//fmt.Println("DHCP layer detected.")
-					//fmt.Printf("Offered IP: %v for %v\n", dhcp4.YourClientIP, dhcp4.ClientHWAddr)
-					//for i, _ := range dhcp4.Options {
-					//		fmt.Println(dhcp4.Options[i], i)
-					//	}
 
 					if dhcp4.Operation == layers.DHCPOpReply {
 						log.Println("DHCP Replay message found")
@@ -244,10 +228,10 @@ func (c *Client) readPacket(handle *pcap.Handle, endChan chan<- int, requestsNum
 							log.Println("DHCP Offer message found")
 							log.Printf("Offered IP: %v for %v\n", dhcp4.YourClientIP, dhcp4.ClientHWAddr)
 						}
-						receivedDhcpPacker += 1
+						receivedDhcpPacket += 1
 					}
 
-					if receivedDhcpPacker == requestsNumber {
+					if receivedDhcpPacket == requestsNumber {
 						log.Println("All requests completed")
 						endChan <- 1
 						return
@@ -295,7 +279,7 @@ func (c *Client) sendDiscover() error {
 			log.Println(c.HW, err)
 			return err
 		}
-		log.Println("Sending discovery packet")
+		log.Printf("Sending discovery packet using mac %v ", mac)
 		c.writePacket(buff.Bytes())
 	}
 	return nil
@@ -306,7 +290,7 @@ func (c *Client) writePacket(buf []byte) error {
 		log.Printf("Failed to send packet: %s\n", err)
 		return err
 	}
-	log.Println("Packed sended")
+	log.Println("Packet sent")
 	return nil
 
 }
@@ -326,8 +310,8 @@ func (c Client) T2() uint32 {
 func main() {
 	ifname := "enp0s31f6"
 	hostname := "vale-laptop"
-
-	client, err := NewClient("84:7b:eb:27:0c:a5", "00:11:22:33:44:55", ifname, hostname)
+	macs := []string{"11:22:33:44:55:66", "84:7b:eb:27:0c:a4", "84:7b:eb:27:0c:10", "84:7b:eb:27:0c:a9"}
+	client, err := NewClient(macs, ifname, hostname)
 	if err != nil {
 		log.Fatalln(err)
 	}
