@@ -222,17 +222,17 @@ func (c *Client) readPacket(handle *pcap.Handle, endChan chan<- int, requestsNum
 		case packet = <-src.Packets():
 			{
 				if dhcp4layer := packet.Layer(layers.LayerTypeDHCPv4); dhcp4layer != nil {
-					log.Println("Analyizing dhcpv4 packet")
+					//log.Println("Analyizing dhcpv4 packet")
 					dhcp4 := dhcp4layer.(*layers.DHCPv4)
 
 					if dhcp4.Operation == layers.DHCPOpReply {
-						log.Println("DHCP Replay message found")
+						//log.Println("DHCP Replay message found")
 						mtype := byte(layers.DHCPMsgTypeOffer)
-						log.Println(dhcp4.Options)
+						//log.Println(dhcp4.Options)
 						if dhcp4.Options[0].Data[0] == mtype {
 
-							log.Println("DHCP Offer message found")
-							log.Printf("Offered IP: %v for %v\n", dhcp4.YourClientIP, dhcp4.ClientHWAddr)
+							//log.Println("DHCP Offer message found")
+							//log.Printf("Offered IP: %v for %v\n", dhcp4.YourClientIP, dhcp4.ClientHWAddr)
 							testChan <- SingleTest{
 								SrcMac:     dhcp4.ClientHWAddr.String(),
 								ReceivedIp: dhcp4.YourClientIP.String(),
@@ -293,7 +293,7 @@ func (c *Client) sendDiscover() error {
 			log.Println(c.HW, err)
 			return err
 		}
-		log.Printf("Sending discovery packet using mac %v ", mac)
+		//log.Printf("Sending discovery packet using mac %v ", mac)
 		c.writePacket(buff.Bytes())
 	}
 	return nil
@@ -304,7 +304,7 @@ func (c *Client) writePacket(buf []byte) error {
 		log.Printf("Failed to send packet: %s\n", err)
 		return err
 	}
-	log.Println("Packet sent")
+	//log.Println("Packet sent")
 	return nil
 
 }
