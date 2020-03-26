@@ -1,15 +1,38 @@
 package main
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"log"
 
 	dhcpchecker "./dhcp"
 )
 
+type ClusterNetData struct {
+	DNSData []struct {
+		Fqdn       string `json:"fqdn"`
+		MacAddress string `json:"mac_address"`
+		PrimaryIP  string `json:"primary_ip"`
+		ReverseDNS string `json:"reverse_dns"`
+	} `json:"dns_data"`
+	DNSServer  string `json:"dns_server"`
+	DomainData string `json:"domain_data"`
+}
+
 func main() {
+
+	jsonDataFile, _ := ioutil.ReadFile("/tmp/dns-test.json")
+	jsonDataStruct := ClusterNetData{}
+	_ = json.Unmarshal([]byte(jsonDataFile), &jsonDataStruct)
+
 	ifname := "enp0s31f6"
 	hostname := "vale-laptop"
-	macs := []string{"11:22:33:44:55:66", "84:7b:eb:27:0c:a4", "84:7b:eb:27:0c:10", "84:7b:eb:27:0c:a9", "11:22:13:44:55:66", "11:12:33:44:55:66", "51:22:33:44:55:66", "41:22:33:44:55:66", "11:88:33:44:55:66"}
+	macs := []string{}
+	dataReceivedFromDhcp := []dhcpchecker.SingleTest{}
+
+	for _, mac := range jsonDataStruct.DNSData {
+		macs = append(macs, mac.MacAddress)
+	}
 
 	singleTestChan := make(chan dhcpchecker.SingleTest) // Ingress channel
 	status := make(chan int)                            // Test Status
@@ -25,14 +48,14 @@ dhcploop:
 		select {
 		case msg := <-singleTestChan:
 
-			log.Printf("%+v\n", msg)
+			dataReceivedFromDhcp = append(dataReceivedFromDhcp, dhcpchecker.SingleTest(msg))
 
 		case status := <-status:
 
 			if status > 0 {
 				log.Println("Timeout reached")
 			} else {
-				log.Println("Test finished")
+				log.Println("Mac test finished")
 			}
 
 			break dhcploop
@@ -42,5 +65,10 @@ dhcploop:
 	log.Println("Closing channels")
 	close(singleTestChan)
 	close(status)
+
+	for _, singleMacTest := range dataReceivedFromDhcp {
+		log.Printf("%+v\n", singleMacTest)
+
+	}
 
 }
