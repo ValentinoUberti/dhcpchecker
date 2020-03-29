@@ -25,8 +25,8 @@ func main() {
 	jsonDataStruct := ClusterNetData{}
 	_ = json.Unmarshal([]byte(jsonDataFile), &jsonDataStruct)
 
-	ifname := "enp0s31f6"
-	hostname := "vale-laptop"
+	ifname := "eth1"
+	hostname := "lb.example.com"
 	macs := []string{}
 	dataReceivedFromDhcp := []dhcpchecker.SingleTest{}
 
