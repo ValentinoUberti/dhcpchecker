@@ -39,7 +39,7 @@ func NewClient(macsToCheck []string, ifname, hostname string) (*Client, error) {
 
 	//eth layer
 	eth := &layers.Ethernet{}
-	eth.SrcMAC, _ = net.ParseMAC("56:6f:3d:48:00:03")
+	eth.SrcMAC, _ = net.ParseMAC("84:7b:eb:27:0c:a4")
 	eth.DstMAC, _ = net.ParseMAC("ff:ff:ff:ff:ff:ff")
 	eth.EthernetType = layers.EthernetTypeIPv4
 
@@ -66,9 +66,9 @@ func NewClient(macsToCheck []string, ifname, hostname string) (*Client, error) {
 	dhcp4.HardwareType = layers.LinkTypeEthernet
 	dhcp4.Xid = uint32(rand.Int31())
 	dhcp4.ClientIP = net.ParseIP("0.0.0.0")
-	dhcp4.YourClientIP = net.ParseIP("0.0.0.0")
-	dhcp4.NextServerIP = net.ParseIP("0.0.0.0")
-	dhcp4.RelayAgentIP = net.ParseIP("0.0.0.0")
+	//dhcp4.YourClientIP = net.ParseIP("0.0.0.0")
+	//dhcp4.NextServerIP = net.ParseIP("0.0.0.0")
+	//dhcp4.RelayAgentIP = net.ParseIP("0.0.0.0")
 	//dhcp4.ClientHWAddr = hw
 
 	options := []byte{
@@ -240,7 +240,7 @@ func (c *Client) sendDiscover() error {
 
 	for _, mac := range c.macs {
 
-		//c.ethLayer.SrcMAC, _ = net.ParseMAC(mac)
+		c.ethLayer.SrcMAC, _ = net.ParseMAC(mac)
 		c.dhcpLayer.ClientHWAddr, _ = net.ParseMAC(mac)
 
 		buff := gopacket.NewSerializeBuffer()
