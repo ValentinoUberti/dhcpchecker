@@ -1,4 +1,4 @@
-package dhcpchecker
+package macsniffer
 
 import (
 	"log"
@@ -39,7 +39,7 @@ func NewClient(macsToCheck []string, ifname, hostname string) (*Client, error) {
 
 	//eth layer
 	eth := &layers.Ethernet{}
-	eth.SrcMAC,_ = net.ParseMAC("56:6f:3d:48:00:03") 
+	eth.SrcMAC, _ = net.ParseMAC("56:6f:3d:48:00:03")
 	eth.DstMAC, _ = net.ParseMAC("ff:ff:ff:ff:ff:ff")
 	eth.EthernetType = layers.EthernetTypeIPv4
 
@@ -67,8 +67,8 @@ func NewClient(macsToCheck []string, ifname, hostname string) (*Client, error) {
 	dhcp4.Xid = uint32(rand.Int31())
 	dhcp4.ClientIP = net.ParseIP("0.0.0.0")
 	dhcp4.YourClientIP = net.ParseIP("0.0.0.0")
-        dhcp4.NextServerIP = net.ParseIP("0.0.0.0")
-        dhcp4.RelayAgentIP = net.ParseIP("0.0.0.0")
+	dhcp4.NextServerIP = net.ParseIP("0.0.0.0")
+	dhcp4.RelayAgentIP = net.ParseIP("0.0.0.0")
 	//dhcp4.ClientHWAddr = hw
 
 	options := []byte{
@@ -189,11 +189,11 @@ func (c *Client) readPacket(handle *pcap.Handle, endChan chan<- int, requestsNum
 	for {
 		select {
 		case packet = <-src.Packets():
-			{       //log.Printf("%v",packet)
+			{ //log.Printf("%v",packet)
 				if dhcp4layer := packet.Layer(layers.LayerTypeDHCPv4); dhcp4layer != nil {
 					log.Println("Analyizing dhcpv4 packet")
 					dhcp4 := dhcp4layer.(*layers.DHCPv4)
-                                        log.Printf("%v",dhcp4.Operation)
+					log.Printf("%v", dhcp4.Operation)
 
 					if dhcp4.Operation == layers.DHCPOpReply {
 						log.Println("DHCP Replay message found")
@@ -201,8 +201,8 @@ func (c *Client) readPacket(handle *pcap.Handle, endChan chan<- int, requestsNum
 						log.Println(dhcp4.Options)
 						if dhcp4.Options[0].Data[0] == mtype {
 
-						log.Println("DHCP Offer message found")
-						log.Printf("Offered IP: %v for %v\n", dhcp4.YourClientIP, dhcp4.ClientHWAddr)
+							log.Println("DHCP Offer message found")
+							log.Printf("Offered IP: %v for %v\n", dhcp4.YourClientIP, dhcp4.ClientHWAddr)
 							testChan <- SingleTest{
 								SrcMac:     dhcp4.ClientHWAddr.String(),
 								ReceivedIp: dhcp4.YourClientIP.String(),

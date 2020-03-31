@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 
-	dhcpchecker "./dhcp"
+	"github.com/ValentinoUberti/dhcpchecker/macsniffer"
 )
 
 type ClusterNetData struct {
@@ -28,16 +28,16 @@ func main() {
 	ifname := "eth1"
 	hostname := "lb.example.com"
 	macs := []string{}
-	dataReceivedFromDhcp := []dhcpchecker.SingleTest{}
+	dataReceivedFromDhcp := []macsniffer.SingleTest{}
 
 	for _, mac := range jsonDataStruct.DNSData {
 		macs = append(macs, mac.MacAddress)
 	}
 
-	singleTestChan := make(chan dhcpchecker.SingleTest) // Ingress channel
-	status := make(chan int)                            // Test Status
+	singleTestChan := make(chan macsniffer.SingleTest) // Ingress channel
+	status := make(chan int)                           // Test Status
 
-	dhcpClient, err := dhcpchecker.NewClient(macs, ifname, hostname)
+	dhcpClient, err := macsniffer.NewClient(macs, ifname, hostname)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -48,7 +48,7 @@ dhcploop:
 		select {
 		case msg := <-singleTestChan:
 
-			dataReceivedFromDhcp = append(dataReceivedFromDhcp, dhcpchecker.SingleTest(msg))
+			dataReceivedFromDhcp = append(dataReceivedFromDhcp, macsniffer.SingleTest(msg))
 
 		case status := <-status:
 
