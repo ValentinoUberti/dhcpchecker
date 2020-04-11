@@ -11,6 +11,19 @@ import (
 	"github.com/google/gopacket/pcap"
 )
 
+type DNSDataStruct struct {
+	Fqdn       string `json:"fqdn"`
+	MacAddress string `json:"mac_address"`
+	PrimaryIP  string `json:"primary_ip"`
+	ReverseDNS string `json:"reverse_dns"`
+}
+
+type ClusterNetData struct {
+	DNSData    []DNSDataStruct `json:"dns_data"`
+	DNSServer  string          `json:"dns_server"`
+	DomainData string          `json:"domain_data"`
+}
+
 type SingleTest struct {
 	SrcMac     string
 	OfferedIp  string
@@ -156,7 +169,7 @@ func (c *Client) Start(testChan chan<- SingleTest, status chan<- int) error {
 
 	defer readHandle.Close()
 
-	log.Println("Start client")
+	log.Println("Starting client")
 	if err != nil {
 		log.Println(c.HW.String(), "pcap open write handle error: ", err.Error())
 		return err
@@ -193,16 +206,16 @@ func (c *Client) readPacket(handle *pcap.Handle, endChan chan<- int, requestsNum
 				if dhcp4layer := packet.Layer(layers.LayerTypeDHCPv4); dhcp4layer != nil {
 					log.Println("Analyizing dhcpv4 packet")
 					dhcp4 := dhcp4layer.(*layers.DHCPv4)
-					log.Printf("%v", dhcp4.Operation)
+					//log.Printf("%v", dhcp4.Operation)
 
 					if dhcp4.Operation == layers.DHCPOpReply {
 						log.Println("DHCP Replay message found")
 						mtype := byte(layers.DHCPMsgTypeOffer)
-						log.Println(dhcp4.Options)
+						//log.Println(dhcp4.Options)
 						if dhcp4.Options[0].Data[0] == mtype {
 
 							log.Println("DHCP Offer message found")
-							log.Printf("Offered IP: %v for %v\n", dhcp4.YourClientIP, dhcp4.ClientHWAddr)
+							//log.Printf("Offered IP: %v for %v\n", dhcp4.YourClientIP, dhcp4.ClientHWAddr)
 							testChan <- SingleTest{
 								SrcMac:     dhcp4.ClientHWAddr.String(),
 								OfferedIp:  dhcp4.YourClientIP.String(),
@@ -277,16 +290,4 @@ func (c *Client) writePacket(buf []byte) error {
 	//log.Println("Packet sent")
 	return nil
 
-}
-
-func (c Client) Lease() uint32 {
-	return c.lease
-}
-
-func (c Client) T1() uint32 {
-	return c.t1
-}
-
-func (c Client) T2() uint32 {
-	return c.t2
 }
