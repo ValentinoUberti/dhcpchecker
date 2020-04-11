@@ -65,7 +65,11 @@ func multipleMac(cmd *cobra.Command) error {
 	}
 
 	jsonDataStruct := macsniffer.ClusterNetData{}
-	_ = json.Unmarshal([]byte(jsonDataFile), &jsonDataStruct)
+	err = json.Unmarshal([]byte(jsonDataFile), &jsonDataStruct)
+
+	if err != nil {
+		return errors.New("Json file format not correct")
+	}
 
 	ifname := interfaceName
 	hostname := ""

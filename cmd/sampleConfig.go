@@ -25,50 +25,35 @@ const sampleJSONConf = `
 {
     "dns_data": [
         {
-            "fqdn": "bootstrap.myocp.example.com",
             "mac_address": "56:6f:9c:ac:00:06",
-            "primary_ip": "172.17.1.3",
-            "reverse_dns": "3.1.17.172.in-addr.arpa."
+            "primary_ip": "172.17.1.3"
         },
         {
-            "fqdn": "worker-2.myocp.example.com",
             "mac_address": "56:6f:9c:ac:00:09",
-            "primary_ip": "172.17.1.4",
-            "reverse_dns": "4.1.17.172.in-addr.arpa."
+            "primary_ip": "172.17.1.4"
         },
         {
-            "fqdn": "worker-1.myocp.example.com",
             "mac_address": "56:6f:9c:ac:00:08",
-            "primary_ip": "172.17.1.5",
-            "reverse_dns": "5.1.17.172.in-addr.arpa."
+            "primary_ip": "172.17.1.5"
         },
         {
-            "fqdn": "worker-0.myocp.example.com",
             "mac_address": "56:6f:9c:ac:00:07",
-            "primary_ip": "172.17.1.6",
-            "reverse_dns": "6.1.17.172.in-addr.arpa."
+            "primary_ip": "172.17.1.6"
         },
         {
-            "fqdn": "master-2.myocp.example.com",
             "mac_address": "56:6f:9c:ac:00:0c",
-            "primary_ip": "172.17.1.7",
-            "reverse_dns": "7.1.17.172.in-addr.arpa."
+            "primary_ip": "172.17.1.7"
         },
         {
-            "fqdn": "master-1.myocp.example.com",
             "mac_address": "56:6f:9c:ac:00:0b",
-            "primary_ip": "172.17.1.8",
-            "reverse_dns": "8.1.17.172.in-addr.arpa."
+            "primary_ip": "172.17.1.8"
         },
         {
-            "fqdn": "master-0.myocp.example.com",
             "mac_address": "56:6f:9c:ac:00:0a",
-            "primary_ip": "172.17.1.9",
-            "reverse_dns": "9.1.17.172.in-addr.arpa."
+            "primary_ip": "172.17.1.9"
         }
     ],
-    "dns_server": "172.17.1.1",
-    "domain_data": ".myocp.example.com"
+    "dns_server": "172.17.1.1"
 }
 
 `

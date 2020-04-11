@@ -12,6 +12,11 @@ import (
 )
 
 type DNSDataStruct struct {
+	MacAddress string `json:"mac_address"`
+	PrimaryIP  string `json:"primary_ip"`
+}
+
+type FullDNSDataStruct struct {
 	Fqdn       string `json:"fqdn"`
 	MacAddress string `json:"mac_address"`
 	PrimaryIP  string `json:"primary_ip"`
@@ -19,9 +24,9 @@ type DNSDataStruct struct {
 }
 
 type ClusterNetData struct {
-	DNSData    []DNSDataStruct `json:"dns_data"`
-	DNSServer  string          `json:"dns_server"`
-	DomainData string          `json:"domain_data"`
+	DNSData   []DNSDataStruct `json:"dns_data"`
+	DNSServer string          `json:"dns_server"`
+	//DomainData string          `json:"domain_data"`
 }
 
 type SingleTest struct {
