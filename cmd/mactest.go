@@ -18,32 +18,36 @@ package cmd
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"log"
 
 	"github.com/spf13/cobra"
 
 	"github.com/ValentinoUberti/dhcpchecker/macsniffer"
+	"github.com/kr/pretty"
 )
 
+type DNSDataStruct struct {
+	Fqdn       string `json:"fqdn"`
+	MacAddress string `json:"mac_address"`
+	PrimaryIP  string `json:"primary_ip"`
+	ReverseDNS string `json:"reverse_dns"`
+}
+
 type ClusterNetData struct {
-	DNSData []struct {
-		Fqdn       string `json:"fqdn"`
-		MacAddress string `json:"mac_address"`
-		PrimaryIP  string `json:"primary_ip"`
-		ReverseDNS string `json:"reverse_dns"`
-	} `json:"dns_data"`
-	DNSServer  string `json:"dns_server"`
-	DomainData string `json:"domain_data"`
+	DNSData    []DNSDataStruct `json:"dns_data"`
+	DNSServer  string          `json:"dns_server"`
+	DomainData string          `json:"domain_data"`
 }
 
 // mactestCmd represents the mactest command
 var mactestCmd = &cobra.Command{
-	Use:   "mactest",
+	Use:   "mactest --ifname <interface name> (--mac | --config)",
 	Short: "Test for dhcp server ip response from different mac addresses",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		log.Println(mactest(cmd))
+		fmt.Println(mactest(cmd))
 	},
 }
 
@@ -59,15 +63,41 @@ func mactest(cmd *cobra.Command) error {
 		return errors.New("An interface name is required")
 	}
 
-	jsonDataFile, err := ioutil.ReadFile("/tmp/dns-test.json")
+	// Check if single-test is defined
+	singleMac, err := cmd.Flags().GetString("mac")
+
 	if err != nil {
-		return errors.New("Cannot open json file")
+		return errors.New("Error parsing arguments")
 	}
+
+	jsonFile, err := cmd.Flags().GetString("config-file")
+
+	if err != nil {
+		return errors.New("Error parsing arguments")
+	}
+
+	if singleMac == "" && jsonFile == "" {
+		return errors.New("A config file or a single mac address is required")
+	}
+
 	jsonDataStruct := ClusterNetData{}
-	_ = json.Unmarshal([]byte(jsonDataFile), &jsonDataStruct)
+	if len(jsonFile) > 0 {
+		jsonDataFile, err := ioutil.ReadFile(jsonFile)
+		if err != nil {
+			return errors.New("Cannot open json file")
+		}
+
+		_ = json.Unmarshal([]byte(jsonDataFile), &jsonDataStruct)
+	} else {
+
+		data := DNSDataStruct{
+			MacAddress: singleMac,
+		}
+		jsonDataStruct.DNSData = append(jsonDataStruct.DNSData, data)
+	}
 
 	ifname := interfaceName
-	hostname := "lb.example.com"
+	hostname := ""
 	macs := []string{}
 	dataReceivedFromDhcp := []macsniffer.SingleTest{}
 
@@ -107,10 +137,7 @@ dhcploop:
 	close(singleTestChan)
 	close(status)
 
-	for _, singleMacTest := range dataReceivedFromDhcp {
-		log.Printf("%+v\n", singleMacTest)
-
-	}
+	fmt.Printf("%# v", pretty.Formatter(dataReceivedFromDhcp))
 
 	return nil
 }
@@ -119,6 +146,8 @@ func init() {
 	rootCmd.AddCommand(mactestCmd)
 	//mactestCmd.Flags().StringP("ifname", "", "", "Name of the interface to test.")
 	mactestCmd.PersistentFlags().StringP("ifname", "", "", "Name of the interface to test.")
+	mactestCmd.PersistentFlags().StringP("config-file", "", "", "Config file full path")
+	mactestCmd.PersistentFlags().StringP("mac", "", "", "Single mac address to test")
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command

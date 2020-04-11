@@ -13,7 +13,7 @@ import (
 
 type SingleTest struct {
 	SrcMac     string
-	ReceivedIp string
+	OfferedIp  string
 	DhcpServer string
 }
 
@@ -205,7 +205,7 @@ func (c *Client) readPacket(handle *pcap.Handle, endChan chan<- int, requestsNum
 							log.Printf("Offered IP: %v for %v\n", dhcp4.YourClientIP, dhcp4.ClientHWAddr)
 							testChan <- SingleTest{
 								SrcMac:     dhcp4.ClientHWAddr.String(),
-								ReceivedIp: dhcp4.YourClientIP.String(),
+								OfferedIp:  dhcp4.YourClientIP.String(),
 								DhcpServer: net.IP(dhcp4.Options[1].Data).String(),
 							}
 
