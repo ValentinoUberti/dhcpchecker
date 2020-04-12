@@ -36,7 +36,7 @@ var multipleMacCmd = &cobra.Command{
 		err := multipleMac(cmd)
 		if err != nil {
 			fmt.Println(err)
-			fmt.Println("run `dhcpchecker multiple-mac --help` for help")
+			fmt.Println(cmd.Usage())
 		}
 	},
 }
