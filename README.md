@@ -15,15 +15,15 @@ Build using go modules:
 
 Usage:
 
-Single mac test
+- Single mac test
 
 ```sudo dhcpchecker single-mac --ifname <interface_name> --mac <mac_to_test> --expected-ip <excpected_ip>```
 
-Multiple mac test
+- Multiple mac test
 
 ```sudo dhcpchecker multiple-mac --ifname <interface_name> --config-file <config_file>```
 
-A sample config file can be obtained with:
+- A sample config file can be obtained with:
 
 ```dhcpchecker sample-config```
 
