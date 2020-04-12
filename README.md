@@ -8,11 +8,11 @@ Usage:
 
 Single mac test
 
-```dhcpchecker single-mac --ifname <interface_name> --mac <mac_to_test> --expected-ip <excpected_ip>```
+```sudo dhcpchecker single-mac --ifname <interface_name> --mac <mac_to_test> --expected-ip <excpected_ip>```
 
 Multiple mac test
 
-```dhcpchecker multiple-mac --ifname <interface_name> --config-file <config_file>```
+```sudo dhcpchecker multiple-mac --ifname <interface_name> --config-file <config_file>```
 
 A sample config file can be obtained with:
 
