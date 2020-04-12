@@ -1,6 +1,8 @@
-## dhcpchecker
-# Work in progress
+# Dhcpchecker
 Checks for dhcpv4 offers using desiderate MAC address
+
+## This is a work in progress project.
+
 
 Usage:
 
@@ -17,8 +19,8 @@ A sample config file can be obtained with:
 ```dhcpchecker sample-config```
 
 
-# Pcap is required
+# Pcap devel is required
 
 On Centos 8: dnf --enablerepo=PowerTools install libpcap-devel
 
-# If running inside virtual machine on oVirt install the macspoof hook
+# If running inside virtual machine on oVirt install and enable the macspoof hook
