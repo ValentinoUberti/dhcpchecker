@@ -3,6 +3,15 @@ Checks for dhcpv4 offers using desiderate MAC address
 
 ## This is a work in progress project.
 
+Requirements:
+
+- go1.14 linux/amd64
+- pcap devel
+- run as privileged user
+
+Build using go modules:
+
+```go build .```
 
 Usage:
 
