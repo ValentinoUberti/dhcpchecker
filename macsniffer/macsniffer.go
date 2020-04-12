@@ -57,7 +57,6 @@ func NewClient(macsToCheck []string, ifname, hostname string) (*Client, error) {
 
 	//eth layer
 	eth := &layers.Ethernet{}
-	eth.SrcMAC, _ = net.ParseMAC("84:7b:eb:27:0c:a4")
 	eth.DstMAC, _ = net.ParseMAC("ff:ff:ff:ff:ff:ff")
 	eth.EthernetType = layers.EthernetTypeIPv4
 
@@ -84,10 +83,6 @@ func NewClient(macsToCheck []string, ifname, hostname string) (*Client, error) {
 	dhcp4.HardwareType = layers.LinkTypeEthernet
 	dhcp4.Xid = uint32(rand.Int31())
 	dhcp4.ClientIP = net.ParseIP("0.0.0.0")
-	//dhcp4.YourClientIP = net.ParseIP("0.0.0.0")
-	//dhcp4.NextServerIP = net.ParseIP("0.0.0.0")
-	//dhcp4.RelayAgentIP = net.ParseIP("0.0.0.0")
-	//dhcp4.ClientHWAddr = hw
 
 	options := []byte{
 		1,  // (Subnet mask)
@@ -169,7 +164,7 @@ func NewClient(macsToCheck []string, ifname, hostname string) (*Client, error) {
 func (c *Client) Start(testChan chan<- SingleTest, status chan<- int) error {
 
 	timeout := 3 * time.Second
-	//readHandle, err := pcap.OpenLive(c.IFName, 1024, false, pcap.BlockForever)
+
 	readHandle, err := pcap.OpenLive(c.IFName, 1024, false, timeout)
 
 	defer readHandle.Close()
@@ -207,20 +202,19 @@ func (c *Client) readPacket(handle *pcap.Handle, endChan chan<- int, requestsNum
 	for {
 		select {
 		case packet = <-src.Packets():
-			{ //log.Printf("%v",packet)
+			{
 				if dhcp4layer := packet.Layer(layers.LayerTypeDHCPv4); dhcp4layer != nil {
 					log.Println("Analyizing dhcpv4 packet")
 					dhcp4 := dhcp4layer.(*layers.DHCPv4)
-					//log.Printf("%v", dhcp4.Operation)
 
 					if dhcp4.Operation == layers.DHCPOpReply {
 						log.Println("DHCP Replay message found")
 						mtype := byte(layers.DHCPMsgTypeOffer)
-						//log.Println(dhcp4.Options)
+
 						if dhcp4.Options[0].Data[0] == mtype {
 
 							log.Println("DHCP Offer message found")
-							//log.Printf("Offered IP: %v for %v\n", dhcp4.YourClientIP, dhcp4.ClientHWAddr)
+
 							testChan <- SingleTest{
 								SrcMac:     dhcp4.ClientHWAddr.String(),
 								OfferedIp:  dhcp4.YourClientIP.String(),
@@ -292,7 +286,7 @@ func (c *Client) writePacket(buf []byte) error {
 		log.Printf("Failed to send packet: %s\n", err)
 		return err
 	}
-	//log.Println("Packet sent")
+
 	return nil
 
 }
