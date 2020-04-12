@@ -23,4 +23,4 @@ A sample config file can be obtained with:
 
 On Centos 8: dnf --enablerepo=PowerTools install libpcap-devel
 
-# If running inside virtual machine on oVirt install and enable the macspoof hook
+If running inside virtual machine on oVirt install and enable the macspoof hook
